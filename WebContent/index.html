@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Lista de Tarefas</title>
+
+<style>
+
+#app1 {
+	margin: 0 auto;
+	width: 700px;
+}
+
+body {
+	font-family: Helvetica Neue, Arial, sans-serif;
+	font-size: 14px;
+	color: #444;
+}
+
+table {
+	border-radius: 3px;
+	background-color: #fff;
+	width: 100%;
+}
+td {
+	background-color: #f9f9f9;
+}
+th, td {
+	min-width: 120px;
+	padding: 10px 20px;
+}
+
+.riscado {
+	text-decoration: line-through;
+	color: #bbbbbb;
+}
+
+.titulo {
+	text-transform: uppercase;
+	font-family: 'Open Sans Condensed', sans-serif;
+	color: #797979;
+	font-size: 28px;
+	font-weight: 100;
+	text-align: center;
+}
+
+.userinput input[type="text"] {
+	float: left;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	outline: none;
+	display: block;
+	width: 89%; 
+	padding: 7px;
+	border: none;
+	border-bottom: 1px solid #ddd;
+	background: transparent;
+	margin-bottom: 10px;
+	font: 16px Arial, Helvetica, sans-serif;
+	height: 30px;
+}
+.userinput input[type="button"] {
+	float: right;
+	width: 9%;
+	-moz-box-shadow: inset 0px 1px 0px 0px #3ba575;
+	-webkit-box-shadow: inset 0px 1px 0px 0px #3ba575;
+	box-shadow: inset 0px 1px 0px 0px #42b983;
+	background-color: #42b983;
+	border: 1px solid #339066;
+	display: inline-block;
+	cursor: pointer;
+	color: #FFFFFF;
+	font-family: 'Open Sans Condensed', sans-serif;
+	font-size: 14px;
+	padding: 4px 16px;
+	text-decoration: none;
+	text-transform: uppercase;
+	/* border-radius: 2px; */
+}
+.userinput input[type="button"]:hover {
+	background: linear-gradient(to bottom, #3ba575 5%, #338e65 100%);
+	background-color: #338e65;
+}
+.userinput input[type="button"]:focus {
+	outline: 0;
+}
+</style>
+
+
+
+</head>
+<body>
+
+<div id="app1" class="div_principal" >
+
+<h2 class="titulo">Não Esquecer:</h2>
+
+<p class="userinput"> 
+	<input type="text" v-model="userInput" placeholder="Nova Tarefa..." /> 
+	<input type="button" value="Ok" @click="adicionarTarefa" />
+</p>
+
+<table>
+	<tbody>
+		<tr v-for="obj in lista">
+			<td v-bind:class="{'riscado':obj.feito}">
+				<input v-if="!obj.feito" type="checkbox" @click="tarefaFeita(obj)" > 
+				<input v-else  checked   type="checkbox" @click="tarefaFeita(obj)" > 
+				{{obj.tarefa}} 
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+Vue.config.devtools = true
+
+var app = new Vue({
+	  el: '#app1',
+	  data: {
+		  userInput: '',
+		  lista: [
+			 {
+				 feito: false,
+				 tarefa: "tirar lixo de casa"
+			 },
+			 {
+				 feito: true,
+				 tarefa: "lavar louça"
+			 }
+			 
+		  ]
+	  },
+	  methods: {
+		  adicionarTarefa: function() {
+			  
+		  },
+		  tarefaFeita: function(objj) {
+			objj.feito = !objj.feito;
+		  }
+	  }
+	})
+</script>
+</body>
+</html>
