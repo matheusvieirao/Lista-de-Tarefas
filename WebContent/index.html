@@ -5,7 +5,6 @@
 <title>Lista de Tarefas</title>
 
 <style>
-
 #app1 {
 	margin: 0 auto;
 	width: 700px;
@@ -22,20 +21,30 @@ table {
 	background-color: #fff;
 	width: 100%;
 }
+
 td {
 	background-color: #f9f9f9;
 }
+
 th, td {
 	min-width: 120px;
 	padding: 10px 20px;
 }
 
-.riscado {
-	text-decoration: line-through;
+.c_riscado {
 	color: #bbbbbb;
+	text-decoration: line-through;
 }
 
-.titulo {
+.c_icone {
+	color: #444;
+	text-decoration: none;
+	float: right;
+	margin-left: 6px;
+	cursor: pointer;
+}
+
+.c_titulo {
 	text-transform: uppercase;
 	font-family: 'Open Sans Condensed', sans-serif;
 	color: #797979;
@@ -44,14 +53,14 @@ th, td {
 	text-align: center;
 }
 
-.userinput input[type="text"] {
+.c_nova_tarefa input[type="text"] {
 	float: left;
 	box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	outline: none;
 	display: block;
-	width: 89%; 
+	width: 89%;
 	padding: 7px;
 	border: none;
 	border-bottom: 1px solid #ddd;
@@ -60,7 +69,8 @@ th, td {
 	font: 16px Arial, Helvetica, sans-serif;
 	height: 30px;
 }
-.userinput input[type="button"] {
+
+.c_nova_tarefa input[type="button"] {
 	float: right;
 	width: 9%;
 	-moz-box-shadow: inset 0px 1px 0px 0px #3ba575;
@@ -78,13 +88,46 @@ th, td {
 	text-transform: uppercase;
 	/* border-radius: 2px; */
 }
-.userinput input[type="button"]:hover {
+
+.c_nova_tarefa input[type="button"]:hover {
 	background: linear-gradient(to bottom, #3ba575 5%, #338e65 100%);
 	background-color: #338e65;
 }
-.userinput input[type="button"]:focus {
+
+.c_nova_tarefa input[type="button"]:focus {
 	outline: 0;
 }
+
+.c_editar_tarefa {
+	height: 9px;
+	
+	/*color:red;
+	text-decoration: underline;
+	
+	
+	
+	
+	/*border: none;
+	background-color: #f9f9f9;
+	
+	
+	/* 
+	float: left;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	outline: none;
+	display: block;
+	width: 89%;
+	padding: 7px;
+	border: none;
+	border-bottom: 1px solid #ddd;
+	background: transparent;
+	margin-bottom: 10px;
+	font: 16px Arial, Helvetica, sans-serif;
+	height: 30px; */
+}
+
 </style>
 
 
@@ -92,35 +135,49 @@ th, td {
 </head>
 <body>
 
-<div id="app1" class="div_principal" >
+	<div id="app1">
 
-<h2 class="titulo">Não Esquecer:</h2>
+		<h2 class="c_titulo">Não Esquecer:</h2>
 
-<p class="userinput"> 
-	<input type="text" v-model="userInput" placeholder="Nova Tarefa..." /> 
-	<input type="button" value="Ok" @click="adicionarTarefa" />
-</p>
+		<p class="c_nova_tarefa">
+			<input type="text" v-model="userInput" placeholder="Nova Tarefa..." />
+			<input type="button" value="Ok" @click="adicionarTarefa" />
+		</p>
 
-<table>
-	<tbody>
-		<tr v-for="obj in lista">
-			<td v-bind:class="{'riscado':obj.feito}">
-				<input v-if="!obj.feito" type="checkbox" @click="tarefaFeita(obj)" > 
-				<input v-else  checked   type="checkbox" @click="tarefaFeita(obj)" > 
-				{{obj.tarefa}} 
-			</td>
-		</tr>
-	</tbody>
-</table>
+		<table>
+			<tbody>
+				<tr v-for="obj in lista">
+					<td v-bind:class="{'c_riscado':obj.feito}">
+						<input v-if="!obj.feito" type="checkbox" @click="tarefaFeita(obj)">
+						<input v-else checked type="checkbox" @click="tarefaFeita(obj)">
+						
+						<span v-if="!obj.editando" @click="editarItem(obj)" > {{obj.tarefa}} </span> 
+						<input class="c_editar_tarefa" v-if="obj.editando" type="text" v-model="obj.tarefa" >
+						
+						<span class="c_icone" @click="excluirItem(obj)">&#10060;</span>
+						
+						<span v-if="!obj.editando" class="c_icone" @click="editarItem(obj)">&#9997;</span>
+						<span v-if="obj.editando" class="c_icone" @click="editarItem(obj)">&#9996;</span>
+					</td>
+				</tr>
+			</tbody>
+		</table>
 
-</div>
+	</div>
 
 
 
-<script src="https://cdn.jsdelivr.net/npm/vue"></script>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-<script>
+	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<script>
 Vue.config.devtools = true
+
+/*to do list:
+	- fazer com que o botão OK não funcione se userInput == ''
+	- só permitir 1 obj.editando como true por vez.
+	- se tiver editando e clicar em qqr outro lugar da tela, sair do modo edicao
+
+*/
 
 var app = new Vue({
 	  el: '#app1',
@@ -128,23 +185,54 @@ var app = new Vue({
 		  userInput: '',
 		  lista: [
 			 {
+				 id: 1,
 				 feito: false,
-				 tarefa: "tirar lixo de casa"
-			 },
+				 tarefa: "tirar lixo de casa",
+				 editando: false
+			 } ,
 			 {
-				 feito: true,
-				 tarefa: "lavar louça"
-			 }
-			 
+				 id: 2,
+				 feito: false,
+				 tarefa: "lavar louça",
+				 editando: false
+			 } 
 		  ]
 	  },
 	  methods: {
+		  
 		  adicionarTarefa: function() {
-			  
+			  axios.post("/TaskList/rest/task/salvar", this.userInput)
+			  	.then(response => {
+			  		this.lista.push(response.data);
+			  })
+    		  	.catch(function (error) {
+      		    console.log(error);
+      		  });
+			  this.userInput = '';
 		  },
-		  tarefaFeita: function(objj) {
-			objj.feito = !objj.feito;
+		  
+		  editarItem: function(obj) {
+			  for (index in this.lista) {
+				  if (this.lista[index].id != obj.id) {
+					console.log(this.lista[index].id);
+					console.log(obj.id);
+					this.lista[index].editando = false
+				  }
+			  }
+			  obj.editando = !obj.editando;
+		  },
+		  
+		  excluirItem: function(obj){
+			  console.log("entrou");
+				for (o in this.lista) {
+					o.editando = false;
+				}
+		  },
+		  
+		  tarefaFeita: function(obj) {
+			obj.feito = !obj.feito;
 		  }
+		  
 	  }
 	})
 </script>
