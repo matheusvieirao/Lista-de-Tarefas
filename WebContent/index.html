@@ -100,7 +100,7 @@ th, td {
 
 .c_editar_tarefa {
 	height: 9px;
-	
+
 	/*color:red;
 	text-decoration: underline;
 	
@@ -127,7 +127,6 @@ th, td {
 	font: 16px Arial, Helvetica, sans-serif;
 	height: 30px; */
 }
-
 </style>
 
 
@@ -150,14 +149,19 @@ th, td {
 					<td v-bind:class="{'c_riscado':obj.feito}">
 						<input v-if="!obj.feito" type="checkbox" @click="tarefaFeita(obj)">
 						<input v-else checked type="checkbox" @click="tarefaFeita(obj)">
+
+						<!-- Mostrar Tarefa -->
+						<span v-if="!obj.editando" @click="editarItem(obj)"> {{obj.tarefa}} </span> 
+						<!-- Editar Tarefa -->
+						<input class="c_editar_tarefa"
+						v-if="obj.editando" type="text" v-model="obj.tarefa">
 						
-						<span v-if="!obj.editando" @click="editarItem(obj)" > {{obj.tarefa}} </span> 
-						<input class="c_editar_tarefa" v-if="obj.editando" type="text" v-model="obj.tarefa" >
-						
-						<span class="c_icone" @click="excluirItem(obj)">&#10060;</span>
-						
-						<span v-if="!obj.editando" class="c_icone" @click="editarItem(obj)">&#9997;</span>
-						<span v-if="obj.editando" class="c_icone" @click="editarItem(obj)">&#9996;</span>
+						<!-- Deletar &#10006 &#10060 (opções de icones) -->
+						<span class="c_icone" @click="excluirItem(obj)">&#10006;</span>
+						<!-- Editar &#9998 &#9997 -->
+						<span v-if="!obj.editando" class="c_icone" @click="editarItem(obj)">&#9998;</span>
+						<!-- Salvar edição &#10004 &#9996 --> 
+						<span v-if="obj.editando" class="c_icone" @click="editarItem(obj)">&#10004;</span> 
 					</td>
 				</tr>
 			</tbody>
@@ -203,7 +207,10 @@ var app = new Vue({
 		  adicionarTarefa: function() {
 			  axios.post("/TaskList/rest/task/salvar", this.userInput)
 			  	.then(response => {
-			  		this.lista.push(response.data);
+			  		this.lista.push(response.data); //aqui só estamos add o novo item na lista
+			  		for (index in this.lista) {
+			  			this.lista[index].editando = false;
+			  		}
 			  })
     		  	.catch(function (error) {
       		    console.log(error);
@@ -214,8 +221,6 @@ var app = new Vue({
 		  editarItem: function(obj) {
 			  for (index in this.lista) {
 				  if (this.lista[index].id != obj.id) {
-					console.log(this.lista[index].id);
-					console.log(obj.id);
 					this.lista[index].editando = false
 				  }
 			  }
@@ -223,18 +228,39 @@ var app = new Vue({
 		  },
 		  
 		  excluirItem: function(obj){
-			  console.log("entrou");
-				for (o in this.lista) {
-					o.editando = false;
-				}
+			// funçao provisoria. tem um bug quando se apaga todos os itens da lista
+			var lista_aux = [{}];
+			var index_aux = 0;
+			for (index in this.lista) {
+			  if (this.lista[index].id != obj.id) {
+				lista_aux[index_aux] = this.lista[index];
+				index_aux++;
+			  }
+			}
+			this.lista = lista_aux;
 		  },
 		  
 		  tarefaFeita: function(obj) {
 			obj.feito = !obj.feito;
-		  }
-		  
+		  },  
+	  },
+	  
+	  /* created: listarDados()   */
+	  created(){
+		  listarDados();
 	  }
 	})
+	
+	function listarDados() {
+	axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded';
+		axios.get("/crudws/rest/pessoa/listar")
+		.then(response => {
+			console.log(response.data);
+		})
+		.catch(function(error) {
+			console.log(error);
+		});
+	}
 </script>
 </body>
 </html>

@@ -1,10 +1,27 @@
 package hepta.tasklist.entity;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table (name = "Task")
 public class Task {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id")
 	private Long id;
+
+	@Column(name = "feito")
 	private Boolean feito;
+	
+	@Column(name = "tarefa")
 	private String tarefa;
-	private Boolean editando;
+	
 
 	public Long getId() {
 		return id;
@@ -30,12 +47,5 @@ public class Task {
 		this.tarefa = tarefa;
 	}
 
-	public Boolean getEditando() {
-		return editando;
-	}
-
-	public void setEditando(Boolean editando) {
-		this.editando = editando;
-	}
 
 }
