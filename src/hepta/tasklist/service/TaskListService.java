@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
@@ -30,6 +32,27 @@ public class TaskListService {
 	public String sayPlainTextHello() {
 		return "Hello Jersey";
 	}
+
+	@POST
+	@Path("/salvar")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Task inserirPessoa(String nomeTarefa) throws Exception {
+		Task objeto = new Task();
+		
+		if(nomeTarefa != "") {
+			objeto.setFeito(false);
+			objeto.setTarefa(nomeTarefa);
+			objeto = dao.salvar(objeto);
+		}
+		return objeto;
+	}
+	
+	@DELETE
+	@Path("/deletar/{id}")
+	public void delete(@PathParam("id")long id) throws Exception {
+		dao.excluir(id);
+	}
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -45,21 +68,5 @@ public class TaskListService {
 		};
 		
 		return Response.ok().entity(entity).build();
-	}
-
-	@POST
-	@Path("/salvar")
-	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Task inserirPessoa(String nomeTarefa) throws Exception {
-		Task objeto = new Task();
-		
-		if(nomeTarefa != "") {
-			objeto.setFeito(false);
-			objeto.setTarefa(nomeTarefa);
-			objeto = dao.salvar(objeto);
-			System.out.println(objeto.getTarefa()+" adicionado ao banco de dados\n");
-		}
-		return objeto;
 	}
 }

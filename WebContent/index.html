@@ -157,7 +157,7 @@ th, td {
 						v-if="obj.editando" type="text" v-model="obj.tarefa">
 						
 						<!-- Deletar &#10006 &#10060 (opções de icones) -->
-						<span class="c_icone" @click="excluirItem(obj)">&#10006;</span>
+						<span class="c_icone" @click="excluirItem(obj.id)">&#10006;</span>
 						<!-- Editar &#9998 &#9997 -->
 						<span v-if="!obj.editando" class="c_icone" @click="editarItem(obj)">&#9998;</span>
 						<!-- Salvar edição &#10004 &#9996 --> 
@@ -187,57 +187,50 @@ var app = new Vue({
 	  el: '#app1',
 	  data: {
 		  userInput: '',
-		  lista: [
+		  lista: [{}]
+			/* [
 			 {
 				 id: 1,
 				 feito: false,
-				 tarefa: "tirar lixo de casa",
+				 tarefa: "teste",
 				 editando: false
-			 } ,
-			 {
-				 id: 2,
-				 feito: false,
-				 tarefa: "lavar louça",
-				 editando: false
-			 } 
-		  ]
+			 }
+		  ] */
 	  },
 	  methods: {
 		  
 		  adicionarTarefa: function() {
-			  axios.post("/TaskList/rest/task/salvar", this.userInput)
+			  axios.post("/TaskList/rest/task/salvar", app.userInput)
 			  	.then(response => {
-			  		this.lista.push(response.data); //aqui só estamos add o novo item na lista
-			  		for (index in this.lista) {
-			  			this.lista[index].editando = false;
+			  		app.lista.push(response.data); //aqui só estamos add o novo item na lista
+			  		for (index in app.lista) {
+			  			app.lista[index].editando = false;
 			  		}
 			  })
     		  	.catch(function (error) {
       		    console.log(error);
       		  });
-			  this.userInput = '';
+			  app.userInput = '';
 		  },
 		  
 		  editarItem: function(obj) {
-			  for (index in this.lista) {
-				  if (this.lista[index].id != obj.id) {
-					this.lista[index].editando = false
+			  for (index in app.lista) {
+				  if (app.lista[index].id != obj.id) {
+					  app.lista[index].editando = false
 				  }
 			  }
 			  obj.editando = !obj.editando;
 		  },
 		  
-		  excluirItem: function(obj){
-			// funçao provisoria. tem um bug quando se apaga todos os itens da lista
-			var lista_aux = [{}];
-			var index_aux = 0;
-			for (index in this.lista) {
-			  if (this.lista[index].id != obj.id) {
-				lista_aux[index_aux] = this.lista[index];
-				index_aux++;
-			  }
-			}
-			this.lista = lista_aux;
+		  excluirItem: function(id){
+			
+			axios.delete("/TaskList/rest/task/deletar/"+id)
+				.then(function (response) {
+					listarDados();
+				})
+				.catch(function (error) {
+					console.log(error)
+				});
 		  },
 		  
 		  tarefaFeita: function(obj) {
@@ -252,10 +245,12 @@ var app = new Vue({
 	})
 	
 	function listarDados() {
-	axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded';
-		axios.get("/crudws/rest/pessoa/listar")
+		axios.get("/TaskList/rest/task/listar")
 		.then(response => {
-			console.log(response.data);
+			app.lista = response.data;
+			for (index in app.lista) {
+				app.lista[index].editando = false;
+			}
 		})
 		.catch(function(error) {
 			console.log(error);
