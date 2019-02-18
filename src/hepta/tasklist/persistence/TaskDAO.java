@@ -52,4 +52,14 @@ public class TaskDAO implements Serializable {
 		em.close();
 	}
 
+	public void atualizar(Task objeto) throws Exception {
+		EntityManager em = HibernateUtil.getEntityManager();
+		em.getTransaction().begin();
+		
+		em.merge(objeto);
+		
+		em.getTransaction().commit();
+		em.close();
+	}
+
 }

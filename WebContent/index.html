@@ -139,30 +139,31 @@ th, td {
 		<h2 class="c_titulo">Não Esquecer:</h2>
 
 		<p class="c_nova_tarefa">
-			<input type="text" v-model="userInput" placeholder="Nova Tarefa..." />
-			<input type="button" value="Ok" @click="adicionarTarefa" />
+			<input type="text" v-model="userInput" placeholder="Nova Tarefa..."
+				v-on:keyup.enter="adicionarTarefa" /> <input type="button"
+				value="Ok" @click="adicionarTarefa" :disabled="userInput==''" />
 		</p>
 
 		<table>
 			<tbody>
 				<tr v-for="obj in lista">
-					<td v-bind:class="{'c_riscado':obj.feito}">
-						<input v-if="!obj.feito" type="checkbox" @click="tarefaFeita(obj)">
+					<td v-bind:class="{'c_riscado':obj.feito}"><input
+						v-if="!obj.feito" type="checkbox" @click="tarefaFeita(obj)">
 						<input v-else checked type="checkbox" @click="tarefaFeita(obj)">
 
-						<!-- Mostrar Tarefa -->
-						<span v-if="!obj.editando" @click="editarItem(obj)"> {{obj.tarefa}} </span> 
+						<!-- Mostrar Tarefa --> <span v-if="!obj.editando"
+						@click="editarItem(obj.id)"> {{obj.tarefa}} </span> 
 						<!-- Editar Tarefa -->
-						<input class="c_editar_tarefa"
-						v-if="obj.editando" type="text" v-model="obj.tarefa">
-						
-						<!-- Deletar &#10006 &#10060 (opções de icones) -->
-						<span class="c_icone" @click="excluirItem(obj.id)">&#10006;</span>
-						<!-- Editar &#9998 &#9997 -->
-						<span v-if="!obj.editando" class="c_icone" @click="editarItem(obj)">&#9998;</span>
-						<!-- Salvar edição &#10004 &#9996 --> 
-						<span v-if="obj.editando" class="c_icone" @click="editarItem(obj)">&#10004;</span> 
-					</td>
+						<input v-if="obj.editando" class="c_editar_tarefa" type="text"
+						v-model="obj.tarefa" v-on:keyup.enter="salvarEdicao(obj)">
+
+						<!-- Deletar &#10006 &#10060 (opções de icones) --> <span
+						style="color: Tomato" class="c_icone" @click="excluirItem(obj.id)">&#10006;</span>
+						<!-- Editar &#9998 &#9997 --> <span v-if="!obj.editando"
+						class="c_icone" @click="editarItem(obj.id)">&#9998;</span> 
+						<!-- Salvar edição &#10004 &#9996 -->
+						<span v-if="obj.editando" style="color: LimeGreen" class="c_icone"
+						@click="salvarEdicao(obj)">&#10004;</span></td>
 				</tr>
 			</tbody>
 		</table>
@@ -188,38 +189,55 @@ var app = new Vue({
 	  data: {
 		  userInput: '',
 		  lista: [{}]
-			/* [
+			 /* [
 			 {
 				 id: 1,
 				 feito: false,
 				 tarefa: "teste",
 				 editando: false
 			 }
-		  ] */
+		  ]  */
 	  },
 	  methods: {
 		  
 		  adicionarTarefa: function() {
-			  axios.post("/TaskList/rest/task/salvar", app.userInput)
+			  axios.post("/TaskList/rest/task/salvar", this.userInput)
 			  	.then(response => {
-			  		app.lista.push(response.data); //aqui só estamos add o novo item na lista
-			  		for (index in app.lista) {
-			  			app.lista[index].editando = false;
-			  		}
+			  		this.lista.push(response.data);
 			  })
     		  	.catch(function (error) {
       		    console.log(error);
       		  });
-			  app.userInput = '';
+			  this.userInput = '';
 		  },
 		  
-		  editarItem: function(obj) {
-			  for (index in app.lista) {
-				  if (app.lista[index].id != obj.id) {
-					  app.lista[index].editando = false
+		  editarItem: function(id) {
+			  //salvar o ultimo item que estava sendo editado e nao foi salvado
+			  for(index in this.lista) {
+				  if (this.lista[index].editando == true){
+				  	  this.salvarEdicao(this.lista[index]);
 				  }
 			  }
-			  obj.editando = !obj.editando;
+			  
+			  //setar o novo item que esta sendo editado
+			  for (index in this.lista) {
+				  if (this.lista[index].id == id) {
+					  this.lista[index].editando = true;
+			 	  }
+				  else {
+					  this.lista[index].editando = false;
+				  } 
+			  }
+		  },
+		  
+		  salvarEdicao: function(obj){
+			  for (index in this.lista) {
+					this.lista[index].editando = false;
+			  }
+			  axios.post("/TaskList/rest/task/editar", obj)
+    		  	.catch(function (error) {
+      		    console.log(error);
+      		  });
 		  },
 		  
 		  excluirItem: function(id){
@@ -235,10 +253,10 @@ var app = new Vue({
 		  
 		  tarefaFeita: function(obj) {
 			obj.feito = !obj.feito;
+			this.salvarEdicao(obj);
 		  },  
 	  },
 	  
-	  /* created: listarDados()   */
 	  created(){
 		  listarDados();
 	  }

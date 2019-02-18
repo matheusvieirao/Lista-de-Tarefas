@@ -6,6 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table (name = "Task")
@@ -21,6 +22,9 @@ public class Task {
 	
 	@Column(name = "tarefa")
 	private String tarefa;
+	
+	@Transient
+	private Boolean editando;
 	
 
 	public Long getId() {
@@ -45,6 +49,14 @@ public class Task {
 
 	public void setTarefa(String tarefa) {
 		this.tarefa = tarefa;
+	}
+
+	public Boolean getEditando() {
+		return editando;
+	}
+
+	public void setEditando(Boolean editando) {
+		this.editando = editando;
 	}
 
 

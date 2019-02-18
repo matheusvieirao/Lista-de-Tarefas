@@ -47,6 +47,17 @@ public class TaskListService {
 		}
 		return objeto;
 	}
+
+
+	@POST
+	@Path("/editar")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void editarPessoa(final Task objeto) throws Exception {
+		//objeto.setFeito(false);
+		dao.atualizar(objeto);
+		//objeto = dao.salvar(objeto);
+		
+	}
 	
 	@DELETE
 	@Path("/deletar/{id}")
